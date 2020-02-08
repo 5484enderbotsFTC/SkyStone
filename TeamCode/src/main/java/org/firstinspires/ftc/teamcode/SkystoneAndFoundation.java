@@ -234,7 +234,7 @@ public class SkystoneAndFoundation extends LinearOpMode {
         } else {
             telemetry.addData("Alliance", "Blue");
             strafe_Swapper = -1;
-            alliance = -1;
+            alliance = blue;
             LED_strip.setPosition(colorBlue);
         }
         if (position_switch.getState() == true) {

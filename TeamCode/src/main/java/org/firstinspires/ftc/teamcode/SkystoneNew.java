@@ -87,7 +87,7 @@ public class SkystoneNew extends LinearOpMode {
     double fullGrab = 0.33;
     double releaseGrab = 0.7;
     double FLup = 0.8;
-    double FRup = 0.57;
+    double FRup = 0.5;
     double FLdown = 1;
     double FRdown = 0.27;
 
@@ -394,11 +394,11 @@ public class SkystoneNew extends LinearOpMode {
 
         if(alliance == red){
             robotToBridge = 410;
-            bridgeToDeposit = 1600;
+            bridgeToDeposit = 1400;
         }
         else{
             robotToBridge = 660;
-            bridgeToDeposit = 1200;
+            bridgeToDeposit = 1000;
         }
 
         if(alliance == red){
@@ -539,16 +539,25 @@ public class SkystoneNew extends LinearOpMode {
         brakeMotors();
         runWithoutEncoder();
     }
-    private void strafePower(double power) {
-        mtrFR.setPower(-power* strafe_Swapper);
-        mtrFL.setPower(power * strafe_Swapper);
-        mtrBL.setPower(-power * strafe_Swapper);
-        mtrBR.setPower(power * strafe_Swapper);
+    private void strafePowerExtra(double power) {
+        if(alliance==red){
+            mtrFR.setPower(-(power+0.12)* strafe_Swapper);
+            mtrFL.setPower(power * strafe_Swapper);
+            mtrBL.setPower(-power * strafe_Swapper);
+            mtrBR.setPower(power * strafe_Swapper);
+        }
+        else {
+            mtrFR.setPower(-power * strafe_Swapper);
+            mtrFL.setPower((power+0.12) * strafe_Swapper);
+            mtrBL.setPower(-power * strafe_Swapper);
+            mtrBR.setPower(power * strafe_Swapper);
+        }
     }
+
     private void speedStrafe(double power) {
         resetEncoders();
         runUsingEncoders();
-        strafePower(power);
+        strafePowerExtra(power);
         runWithoutEncoder();
     }
 

@@ -7,6 +7,7 @@ import com.qualcomm.robotcore.hardware.TouchSensor;
 import com.qualcomm.robotcore.hardware.DistanceSensor;
 import com.qualcomm.robotcore.hardware.Servo;
 import com.qualcomm.robotcore.util.ElapsedTime;
+import com.qualcomm.robotcore.hardware.DigitalChannel;
 
 
 
@@ -38,6 +39,9 @@ public class teleop_two_remotes extends LinearOpMode {
     TouchSensor topLimit;
     TouchSensor bottomLimit;
 
+    //alliance switch
+    DigitalChannel alliance_switch;
+
     /**
 
      CONSTANTS
@@ -45,7 +49,7 @@ public class teleop_two_remotes extends LinearOpMode {
      */
 
     //servos
-    double extendOut = 0.75;
+    double extendOut = 0.65;
     double extendIn = 0;
 
     double groundArm = 0.05;
@@ -60,16 +64,19 @@ public class teleop_two_remotes extends LinearOpMode {
 
     double FLdown = 1;
     double FLup = 0.8;
-    double FRdown = 0.27;
-    double FRup = 0.53;
+    double FRdown = 0.25;
+    double FRup = 0.5;
 
     //motors
     double liftReversal = 0.05;
     double liftStop = -0;
 
-    double slow = 1;
-
-    double LEDcolor = 0.2375;
+    //alliance switch
+    double alliance = 0;
+    final double red = 1;
+    final double blue = -1;
+    double LEDblue = 0.3845;
+    double LEDred = 0.3945;
 
 
     @Override
@@ -125,12 +132,22 @@ public class teleop_two_remotes extends LinearOpMode {
         topLimit = hardwareMap.get(TouchSensor.class, "topLimit");
         bottomLimit = hardwareMap.get(TouchSensor.class, "bottomLimit");
 
+        //alliance switch
+        alliance_switch = hardwareMap.get(DigitalChannel.class, "alliance_switch");
+
         //set on init
-        LED_strip.setPosition(LEDcolor);
+        if (alliance_switch.getState() == true) {
+            telemetry.addData("Alliance:", "Red");
+            alliance = red;
+            LED_strip.setPosition(LEDred);
+        } else {
+            telemetry.addData("Alliance", "Blue");
+            alliance = -1;
+            LED_strip.setPosition(LEDblue);
+        }
         grab.setPosition(fullGrab);
         FLservo.setPosition(FLup);
         FRservo.setPosition(FRup);
-
         extend.setPosition(extendIn);
 
         //start
@@ -148,15 +165,15 @@ public class teleop_two_remotes extends LinearOpMode {
             //DRIVING
             //Driving: left stick y is forward and backwards and left stick x is turning.
             //right stick x strafes.
-            mtrBL.setPower(gamepad1.left_stick_y - gamepad1.left_stick_x - gamepad1.right_stick_x);
-            mtrBR.setPower(gamepad1.left_stick_y + gamepad1.left_stick_x - gamepad1.right_stick_x);
-            mtrFL.setPower(gamepad1.left_stick_y - gamepad1.left_stick_x + gamepad1.right_stick_x);
-            mtrFR.setPower(gamepad1.left_stick_y + gamepad1.left_stick_x + gamepad1.right_stick_x);
+            mtrBL.setPower((gamepad1.left_stick_y - gamepad1.left_stick_x - gamepad1.right_stick_x) * (1-(gamepad1.right_trigger*0.75)));
+            mtrBR.setPower((gamepad1.left_stick_y + gamepad1.left_stick_x - gamepad1.right_stick_x) * (1-(gamepad1.right_trigger*0.75)));
+            mtrFL.setPower((gamepad1.left_stick_y - gamepad1.left_stick_x + gamepad1.right_stick_x) * (1-(gamepad1.right_trigger*0.75)));
+            mtrFR.setPower((gamepad1.left_stick_y + gamepad1.left_stick_x + gamepad1.right_stick_x) * (1-(gamepad1.right_trigger*0.75)));
 
 
             //GRABBING
             //full grab
-            if(gamepad1.right_trigger == 1) {
+            if(gamepad1.a) {
                 grab.setPosition(fullGrab);
             }
             //release grab
