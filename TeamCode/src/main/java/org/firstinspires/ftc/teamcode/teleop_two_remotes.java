@@ -62,8 +62,8 @@ public class teleop_two_remotes extends LinearOpMode {
     double fullGrab = 0.33;
     double releaseGrab = 0.7;
 
-    double FLdown = 1;
-    double FLup = 0.8;
+    double FLdown = 0.75;
+    double FLup = 0.5;
     double FRdown = 0.25;
     double FRup = 0.5;
 
@@ -175,6 +175,7 @@ public class teleop_two_remotes extends LinearOpMode {
             //full grab
             if(gamepad1.a) {
                 grab.setPosition(fullGrab);
+
             }
             //release grab
             if(gamepad1.left_trigger == 1) {
@@ -184,12 +185,12 @@ public class teleop_two_remotes extends LinearOpMode {
 
             //FOUNDATION MOVEMENT
             //claws both go down
-            if(gamepad1.dpad_up) {
+            if(gamepad1.right_bumper) {
                 FLservo.setPosition(FLdown);
                 FRservo.setPosition(FRdown);
             }
             //claws both retract
-            if(gamepad1.dpad_down){
+            if(gamepad1.left_bumper){
                 FLservo.setPosition(FLup);
                 FRservo.setPosition(FRup);
             }

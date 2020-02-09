@@ -31,108 +31,110 @@ import static org.firstinspires.ftc.robotcore.external.navigation.VuforiaLocaliz
 @Autonomous(name = "SkystoneOnly", group = "Concept")
 //@Disabled
 public class SkystoneNew extends LinearOpMode {
-    private ElapsedTime runtime = new ElapsedTime();
+	private ElapsedTime runtime = new ElapsedTime();
 
-    //motors
-    private DcMotor mtrFR = null;
-    private DcMotor mtrFL = null;
-    private DcMotor mtrBL = null;
-    private DcMotor mtrBR = null;
+	//motors
+	private DcMotor mtrFR = null;
+	private DcMotor mtrFL = null;
+	private DcMotor mtrBL = null;
+	private DcMotor mtrBR = null;
 
-    //servos
-    private Servo grab = null;
-    private Servo arm = null;
-    private Servo extend = null;
-    private Servo FL_hook = null;
-    private Servo FR_hook = null;
-    private Servo LED_strip = null;
+	//servos
+	private Servo grab = null;
+	private Servo arm = null;
+	private Servo extend = null;
+	private Servo FL_hook = null;
+	private Servo FR_hook = null;
+	private Servo LED_strip = null;
 
-    //switches
-    private DigitalChannel alliance_switch;
-    private DigitalChannel position_switch;
+	//switches
+	private DigitalChannel alliance_switch;
+	private DigitalChannel position_switch;
 
-    //colorsensor
-    private NormalizedColorSensor color_sensor;
+	//colorsensor
+	private NormalizedColorSensor color_sensor;
 
-    //webcam
-    private WebcamName Webcam1 = null;
+	//webcam
+	private WebcamName Webcam1 = null;
 
-    //constants
-    double colorRed = 0.6695;
-    double colorBlue = 0.7445;
-    double colorBlack = 0.7745;
-    double colorWhite = 0.7595;
+	//constants
+	double colorRed = 0.6695;
+	double colorBlue = 0.7445;
+	double colorBlack = 0.7745;
+	double colorWhite = 0.7595;
 
-    double runtime1 = 0;
+	double runtime1 = 0;
 
-    int strafe_Swapper = 1;
-    double alliance = 0;
-    final double red = 1;
-    final double blue = -1;
-    int ParkingSpot = 0;
-    int insideLane = 0;
-    int outsideLane = 1;
-    double DistanceStrafed = 0;
+	int strafe_Swapper = 1;
+	double alliance = 0;
+	final double red = 1;
+	final double blue = -1;
+	int ParkingSpot = 0;
+	int insideLane = 0;
+	int outsideLane = 1;
+	double DistanceStrafed = 0;
 
-    long roundedticks = 0;
-    private final double ticksPerMm = 1.68240559922;
-    int positionMm = 0;
+	long roundedticks = 0;
+	private final double ticksPerMm = 1.68240559922;
+	int positionMm = 0;
 
-    int ticksPerInchRound = 42;
-    double halfPower = 0.5;
-    int turnPull = 55*ticksPerInchRound;
+	int ticksPerInchRound = 42;
+	double halfPower = 0.5;
+	int turnPull = 55 * ticksPerInchRound;
 
-    double groundArm = 0.05;
-    double retractArm = 0.75;
-    double fullGrab = 0.33;
-    double releaseGrab = 0.7;
-    double FLup = 0.8;
-    double FRup = 0.5;
-    double FLdown = 1;
-    double FRdown = 0.27;
+	double groundArm = 0.05;
+	double retractArm = 0.75;
+	double fullGrab = 0.33;
+	double releaseGrab = 0.7;
+	double FLup = 0.8;
+	double FRup = 0.5;
+	double FLdown = 1;
+	double FRdown = 0.27;
 
-
-    //measured center of bridge to center of closest wheel
-    double robotToBridge = 410;
-    //webcam aligned with center of first two stones
-    //blue side 660mm offset
-    //red side 410mm offset
-
-    //measured center of bridge to center of wheel at desired deposit location
-    double bridgeToDeposit = 1150;
-    //blue side 1300mm to foundation deposit
-    //red side 1150mm to foundation deposit
+	boolean failure = false;
 
 
-    double webcamToArmMm = 310;
+	//measured center of bridge to center of closest wheel
+	double robotToBridge = 410;
+	//webcam aligned with center of first two stones
+	//blue side 660mm offset
+	//red side 410mm offset
 
-    private int ticksStrafed = 0;
+	//measured center of bridge to center of wheel at desired deposit location
+	double bridgeToDeposit = 1150;
+	//blue side 1300mm to foundation deposit
+	//red side 1150mm to foundation deposit
 
-    //vuforia settings
 
-    //vuforia constants
-    boolean targetVisible = false;
-    boolean skystone_Align = false;
-    boolean detection_Complete = false;
-    double ycoordinate = 0;
-    float phoneXRotate = 0;
-    float phoneYRotate = 0;
-    float phoneZRotate = 0;
+	double webcamToArmMm = 310;
 
-    //conversion for skystone
-    private static final float mmPerInch = 25.4f;
-    private static final float mmTargetHeight = (6) * mmPerInch;
-    private static final float stoneZ = 2.00f * mmPerInch;
+	private int ticksStrafed = 0;
 
-    //class members
-    private OpenGLMatrix lastLocation = null;
-    private VuforiaLocalizer vuforia = null;
+	//vuforia settings
 
-    private static final VuforiaLocalizer.CameraDirection CAMERA_CHOICE = BACK;
-    private static final boolean PHONE_IS_PORTRAIT = false;
+	//vuforia constants
+	boolean targetVisible = false;
+	boolean skystone_Align = false;
+	boolean detection_Complete = false;
+	double ycoordinate = 0;
+	float phoneXRotate = 0;
+	float phoneYRotate = 0;
+	float phoneZRotate = 0;
 
-    @Override
-    public void runOpMode() {
+	//conversion for skystone
+	private static final float mmPerInch = 25.4f;
+	private static final float mmTargetHeight = (6) * mmPerInch;
+	private static final float stoneZ = 2.00f * mmPerInch;
+
+	//class members
+	private OpenGLMatrix lastLocation = null;
+	private VuforiaLocalizer vuforia = null;
+
+	private static final VuforiaLocalizer.CameraDirection CAMERA_CHOICE = BACK;
+	private static final boolean PHONE_IS_PORTRAIT = false;
+
+	@Override
+	public void runOpMode() {
         //configuration of robot stuff
         telemetry.addData("Status", "Initialized");
         telemetry.addData("Status", "Run Time: " + runtime.toString());
@@ -186,13 +188,15 @@ public class SkystoneNew extends LinearOpMode {
         parameters.cameraName = Webcam1;
         parameters.cameraDirection = CAMERA_CHOICE;
 
-        if (CAMERA_CHOICE == BACK)
-        {phoneYRotate = -90;}
-        else
-        {phoneYRotate = 90;}
+        if (CAMERA_CHOICE == BACK) {
+            phoneYRotate = -90;
+        } else {
+            phoneYRotate = 90;
+        }
 
-        if (PHONE_IS_PORTRAIT)
-        {phoneXRotate = 90;}
+        if (PHONE_IS_PORTRAIT) {
+            phoneXRotate = 90;
+        }
 
         final float CAMERA_FORWARD_DISPLACEMENT = 8.5f * mmPerInch;
         final float CAMERA_VERTICAL_DISPLACEMENT = 3.5f * mmPerInch;
@@ -264,8 +268,6 @@ public class SkystoneNew extends LinearOpMode {
 
 
         waitForStart();
-
-        runtime.reset();
         //open claw
         arm.setPosition(groundArm);
         grab.setPosition(releaseGrab);
@@ -275,22 +277,44 @@ public class SkystoneNew extends LinearOpMode {
         speedStrafe(-0.16);
 
         runtime.reset();
-        while (skystone_Align == false) {
-            while (!isStopRequested()) {
-                detection_Complete = false;
-                skystone_Align = false;
-                // check all the trackable targets to see which one (if any) is visible.
-                targetVisible = false;
-                runtime1 = runtime.time();
-                telemetry.addData("Time run:", runtime1);
 
+        while (!isStopRequested()) {
+            failure = false;
+            detection_Complete = false;
+            targetVisible = false;
+            runtime1 = runtime.time();
+            telemetry.addData("Time run:", runtime1);
+            telemetry.update();
+            //failure mode:
+            if ((runtime1 > 10)) {
+                failure = true;
+                telemetry.addData("Fail Safe Mode: ", "Activated");
+                telemetry.update();
+                distanceStrafe(-400 * strafe_Swapper, 0.5);
+                brakeMotors();
+                break;
+            }
 
-                //if it sees the stone, set target visible to true
+            //if it sees the stone, set target visible to true
+            for (VuforiaTrackable trackable : targetsSkyStone) {
+                if (((VuforiaTrackableDefaultListener) trackable.getListener()).isVisible()) {
+                    telemetry.addData("Visible Target", trackable.getName());
+                    telemetry.update();
+                    targetVisible = true;
+                    OpenGLMatrix robotLocationTransform = ((VuforiaTrackableDefaultListener) trackable.getListener()).getUpdatedRobotLocation();
+                    if (robotLocationTransform != null) {
+                        lastLocation = robotLocationTransform;
+                    }
+                    break;
+                }
+            }
+
+            //if the webcam see the stone:
+            if (targetVisible) {
                 for (VuforiaTrackable trackable : targetsSkyStone) {
                     if (((VuforiaTrackableDefaultListener) trackable.getListener()).isVisible()) {
                         telemetry.addData("Visible Target", trackable.getName());
                         targetVisible = true;
-
                         OpenGLMatrix robotLocationTransform = ((VuforiaTrackableDefaultListener) trackable.getListener()).getUpdatedRobotLocation();
                         if (robotLocationTransform != null) {
                             lastLocation = robotLocationTransform;
@@ -298,268 +322,233 @@ public class SkystoneNew extends LinearOpMode {
                         break;
                     }
                 }
+                brakeMotors();
 
-                //if the webcam see the stone:
-                if (targetVisible) {
-
-                    for (VuforiaTrackable trackable : targetsSkyStone) {
-                        if (((VuforiaTrackableDefaultListener) trackable.getListener()).isVisible()) {
-                            telemetry.addData("Visible Target", trackable.getName());
-                            targetVisible = true;
-
-                            OpenGLMatrix robotLocationTransform = ((VuforiaTrackableDefaultListener) trackable.getListener()).getUpdatedRobotLocation();
-                            if (robotLocationTransform != null) {
-                                lastLocation = robotLocationTransform;
-                            }
-                            break;
-                        }
-                    }
-
-                    brakeMotors();
-                    sleep(500);
-
-
-                    //robot position
-                    VectorF translation = lastLocation.getTranslation();
-
-                    //ycoordinate rounded
-                    ycoordinate = translation.get(1);
-                    telemetry.addData( "{Y} = %.1f", ycoordinate);
-                    telemetry.update();
-
-                    ticksStrafed = ticksStrafed + mtrFR.getCurrentPosition();
-
-                    //strafe
-                    runtime.reset();
-
-
-                    distanceStrafe((ycoordinate) - webcamToArmMm,0.3);
-                    //distanceStrafeWithWait(-(ycoordinate + webcamToArmMm), -0.3, 3);
-
-                    //it saw the stone, so:
-                    detection_Complete = true;
-
-
-                    if (!mtrFR.isBusy()) {
-                        telemetry.addData("y-coordinate:", ycoordinate);
-                        telemetry.update();
-                        LED_strip.setPosition(colorBlack);
-                        telemetry.addData("LED Status:", "Off");
-                        telemetry.update();
-                        skystone_Align = true;
-                        break;
-                    }
-                }
-                //if it doesn't see the stone:
-                else {
-                    telemetry.addData("Visible Target", "none");
-                    telemetry.addData("Skystone", "None");
-                }
-
-                telemetry.addData("Time Run:", runtime);
+                //robot position
+                VectorF translation = lastLocation.getTranslation();
+                //ycoordinate rounded
+                ycoordinate = translation.get(1);
+                telemetry.addData("{Y} = %.1f", ycoordinate);
                 telemetry.update();
+
+                ticksStrafed = ticksStrafed + mtrFR.getCurrentPosition();
+
+                //strafe
+                distanceStrafe((ycoordinate) - webcamToArmMm, 0.3);
+
+                //it saw the stone, so:
+                detection_Complete = true;
+
+                telemetry.addData("y-coordinate:", ycoordinate);
+                telemetry.update();
+                LED_strip.setPosition(colorBlack);
+                telemetry.addData("LED Status:", "Off");
+                telemetry.update();
+
+                //first skystone found
+                ticksStrafed = mtrBR.getCurrentPosition() + ticksStrafed;
+                //ticksStrafed = Math.abs(mtrBR.getCurrentPosition())+ticksStrafed;
+                DistanceStrafed = -ticksStrafed / ticksPerMm;
+
+                telemetry.addData("Distance strafed: ", DistanceStrafed);
+                detection_Complete = true;
+                telemetry.addData("Skystone:", "Detected");
+                telemetry.update();
+
+                //drive forward after aligned
+                distanceForward(250, 0.3);
+                brakeMotors();
+
+                //grab
+                grab.setPosition(fullGrab);
+                waitFor(0.75);
+
+                //retract
+                arm.setPosition(retractArm);
+                telemetry.addData("Arm:", "Retracted");
+                telemetry.update();
+
+                //backwards
+                distanceForward(-30, -0.5);
+
+                if (alliance == red) {
+                    robotToBridge = 410;
+                    bridgeToDeposit = 1400;
+                } else {
+                    robotToBridge = 660;
+                    bridgeToDeposit = 1000;
+                }
+                if (alliance == red) {
+                    distanceStrafe((-DistanceStrafed + robotToBridge + bridgeToDeposit) * strafe_Swapper, 0.5);
+                } else {
+                    distanceStrafe((DistanceStrafed + robotToBridge + bridgeToDeposit) * strafe_Swapper, 0.5);
+                }
+
+                distanceForward(80, 0.3);
+
+                arm.setPosition(groundArm);
+                waitFor(0.75);
+                grab.setPosition(releaseGrab);
+                waitFor(0.75);
+                arm.setPosition(retractArm);
+                waitFor(0.25);
+                grab.setPosition(fullGrab);
+
+                if (ParkingSpot == insideLane) {
+                    distanceForward(-40, -0.5);
+                    distanceStrafe((-950 * strafe_Swapper), 0.4);
+                } else {
+                    distanceForward(-600, 0.4);
+                    distanceStrafe((-950 * strafe_Swapper), 0.4);
+                }
+                brakeMotors();
+                //end of program if it worked
+
             }
 
-            if (skystone_Align = true) {
-                break;
-            }
+        }
+
+        if(failure = true){
+            telemetry.addData("Visible Target", "none");
+            telemetry.addData("Skystone", "None");
             telemetry.update();
-        }
+            //fail safe modeee
+            grab.setPosition(fullGrab);
 
-        //first skystone found
-        ticksStrafed = mtrBR.getCurrentPosition()+ticksStrafed;
-        //ticksStrafed = Math.abs(mtrBR.getCurrentPosition())+ticksStrafed;
-        DistanceStrafed = -ticksStrafed / ticksPerMm;
-
-        telemetry.addData("Distance strafed: ", DistanceStrafed);
-        detection_Complete = true;
-        telemetry.addData("Skystone:", "Detected");
-        telemetry.update();
-
-        //drive forward after aligned
-        distanceForward(250,0.3);
-        brakeMotors();
-
-        //grab
-        grab.setPosition(fullGrab);
-        waitFor(0.75);
-
-        //retract
-        arm.setPosition(retractArm);
-        telemetry.addData("Arm:", "Retracted");
-        telemetry.update();
-
-        //backwards
-        distanceForward(-30, -0.5);
-
-        if(alliance == red){
-            robotToBridge = 410;
-            bridgeToDeposit = 1400;
-        }
-        else{
-            robotToBridge = 660;
-            bridgeToDeposit = 1000;
-        }
-
-        if(alliance == red){
-            distanceStrafe((-DistanceStrafed + robotToBridge + bridgeToDeposit) * strafe_Swapper, 0.5);
-        }
-        else {
-            distanceStrafe((DistanceStrafed + robotToBridge + bridgeToDeposit) * strafe_Swapper, 0.5);
-        }
-
-        distanceForward(80, 0.3);
-
-        arm.setPosition(groundArm);
-        waitFor(0.75);
-        grab.setPosition(releaseGrab);
-        waitFor(0.75);
-        arm.setPosition(retractArm);
-        waitFor(0.25);
-        grab.setPosition(fullGrab);
-
-        if (ParkingSpot == insideLane) {
-            distanceForward(-40, -0.5);
-            distanceStrafe((-950 * strafe_Swapper), 0.4);
-        } else {
-            distanceForward(-600, 0.4);
-            distanceStrafe((-950 * strafe_Swapper), 0.4);
-        }
-        brakeMotors();
-
-        /**
-
-         Code ends here
-
-         */
-
-    }
-
-
-    private void resetEncoders() {
-        mtrFR.setMode(DcMotor.RunMode.STOP_AND_RESET_ENCODER);
-        mtrFL.setMode(DcMotor.RunMode.STOP_AND_RESET_ENCODER);
-        mtrBR.setMode(DcMotor.RunMode.STOP_AND_RESET_ENCODER);
-        mtrBL.setMode(DcMotor.RunMode.STOP_AND_RESET_ENCODER);
-    }
-    private void runToPosition() {
-        mtrFR.setMode(DcMotor.RunMode.RUN_TO_POSITION);
-        mtrFL.setMode(DcMotor.RunMode.RUN_TO_POSITION);
-        mtrBR.setMode(DcMotor.RunMode.RUN_TO_POSITION);
-        mtrBL.setMode(DcMotor.RunMode.RUN_TO_POSITION);
-    }
-    private void runWithoutEncoder() {
-        mtrFR.setMode(DcMotor.RunMode.RUN_WITHOUT_ENCODER);
-        mtrFL.setMode(DcMotor.RunMode.RUN_WITHOUT_ENCODER);
-        mtrBR.setMode(DcMotor.RunMode.RUN_WITHOUT_ENCODER);
-        mtrBL.setMode(DcMotor.RunMode.RUN_WITHOUT_ENCODER);
-    }
-    private void runUsingEncoders() {
-        mtrFR.setMode(DcMotor.RunMode.RUN_USING_ENCODER);
-        mtrFL.setMode(DcMotor.RunMode.RUN_USING_ENCODER);
-        mtrBL.setMode(DcMotor.RunMode.RUN_USING_ENCODER);
-        mtrBR.setMode(DcMotor.RunMode.RUN_USING_ENCODER);
-    }
-    private void brakeMotors() {
-        mtrFL.setPower(0);
-        mtrFR.setPower(0);
-        mtrBL.setPower(0);
-        mtrBR.setPower(0);
-    }
-    private void isBusy() {
-        while (mtrBR.isBusy()){
-        }
-    }
-    private void waitFor(double waittime) {
-        runtime.reset();
-        while (runtime.time() < waittime) {
         }
     }
 
-    private void forward(double power) {
-        mtrFR.setPower(power);
-        mtrFL.setPower(power);
-        mtrBL.setPower(power);
-        mtrBR.setPower(power);
-    }
-    private void forwardPosition(double position) {
-        positionMm = (int) (position * ticksPerMm);
-        mtrFR.setTargetPosition(positionMm);
-        mtrFL.setTargetPosition(positionMm);
-        mtrBR.setTargetPosition(positionMm);
-        mtrBL.setTargetPosition(positionMm);
-    }
-    private void distanceForward(double position, double power) {
-        if(position<0){
-            power = -power;
-        }
-        resetEncoders();
-        forwardPosition(position);
-        runToPosition();
-        forward(power);
-        isBusy();
-        //wait for motion to finish
-        brakeMotors();
-        runWithoutEncoder();
-    }
+	/**
 
-    private void strafe(double power) {
-        mtrFR.setPower(-power * strafe_Swapper);
-        mtrFL.setPower(power * strafe_Swapper);
-        mtrBL.setPower(-power * strafe_Swapper);
-        mtrBR.setPower(power * strafe_Swapper);
-    }
-    private void strafePosition(double position){
-        positionMm = (int) (position * ticksPerMm);
-        mtrFR.setTargetPosition(-positionMm);
-        mtrFL.setTargetPosition(positionMm);
-        mtrBL.setTargetPosition(-positionMm);
-        mtrBR.setTargetPosition(positionMm);
-    }
-    private void distanceStrafe(double position, double power) {
-        resetEncoders();
-        strafePosition(position);
-        runToPosition();
-        strafe(power);
-        isBusy();
-        brakeMotors();
-        runWithoutEncoder();
-    }
-    private void distanceStrafeWithWait(double position, double power, double time) {
-        Range.clip(power, -1, 1);
-        resetEncoders();
-        strafePosition(position);
-        runToPosition();
-        strafe(power);
-        while (mtrFR.isBusy()) {
-            if(runtime.time()>time){
-                break;
-            }
-        }
-        brakeMotors();
-        runWithoutEncoder();
-    }
-    private void strafePowerExtra(double power) {
-        if(alliance==red){
-            mtrFR.setPower(-(power+0.12)* strafe_Swapper);
-            mtrFL.setPower(power * strafe_Swapper);
-            mtrBL.setPower(-power * strafe_Swapper);
-            mtrBR.setPower(power * strafe_Swapper);
-        }
-        else {
-            mtrFR.setPower(-power * strafe_Swapper);
-            mtrFL.setPower((power+0.12) * strafe_Swapper);
-            mtrBL.setPower(-power * strafe_Swapper);
-            mtrBR.setPower(power * strafe_Swapper);
-        }
-    }
+	 Code ends here
 
-    private void speedStrafe(double power) {
-        resetEncoders();
-        runUsingEncoders();
-        strafePowerExtra(power);
-        runWithoutEncoder();
-    }
+	 */
+
+
+	private void resetEncoders() {
+		mtrFR.setMode(DcMotor.RunMode.STOP_AND_RESET_ENCODER);
+		mtrFL.setMode(DcMotor.RunMode.STOP_AND_RESET_ENCODER);
+		mtrBR.setMode(DcMotor.RunMode.STOP_AND_RESET_ENCODER);
+		mtrBL.setMode(DcMotor.RunMode.STOP_AND_RESET_ENCODER);
+	}
+	private void runToPosition() {
+		mtrFR.setMode(DcMotor.RunMode.RUN_TO_POSITION);
+		mtrFL.setMode(DcMotor.RunMode.RUN_TO_POSITION);
+		mtrBR.setMode(DcMotor.RunMode.RUN_TO_POSITION);
+		mtrBL.setMode(DcMotor.RunMode.RUN_TO_POSITION);
+	}
+	private void runWithoutEncoder() {
+		mtrFR.setMode(DcMotor.RunMode.RUN_WITHOUT_ENCODER);
+		mtrFL.setMode(DcMotor.RunMode.RUN_WITHOUT_ENCODER);
+		mtrBR.setMode(DcMotor.RunMode.RUN_WITHOUT_ENCODER);
+		mtrBL.setMode(DcMotor.RunMode.RUN_WITHOUT_ENCODER);
+	}
+	private void runUsingEncoders() {
+		mtrFR.setMode(DcMotor.RunMode.RUN_USING_ENCODER);
+		mtrFL.setMode(DcMotor.RunMode.RUN_USING_ENCODER);
+		mtrBL.setMode(DcMotor.RunMode.RUN_USING_ENCODER);
+		mtrBR.setMode(DcMotor.RunMode.RUN_USING_ENCODER);
+	}
+	private void brakeMotors() {
+		mtrFL.setPower(0);
+		mtrFR.setPower(0);
+		mtrBL.setPower(0);
+		mtrBR.setPower(0);
+	}
+	private void isBusy() {
+		while (mtrBR.isBusy()){
+		}
+	}
+		private void waitFor(double waittime) {
+		runtime.reset();
+		while (runtime.time() < waittime) {
+		}
+	}
+
+	private void forward(double power) {
+		mtrFR.setPower(power);
+		mtrFL.setPower(power);
+		mtrBL.setPower(power);
+		mtrBR.setPower(power);
+	}
+	private void forwardPosition(double position) {
+		positionMm = (int) (position * ticksPerMm);
+		mtrFR.setTargetPosition(positionMm);
+		mtrFL.setTargetPosition(positionMm);
+		mtrBR.setTargetPosition(positionMm);
+		mtrBL.setTargetPosition(positionMm);
+	}
+	private void distanceForward(double position, double power) {
+		if(position<0){
+			power = -power;
+		}
+		resetEncoders();
+		forwardPosition(position);
+		runToPosition();
+		forward(power);
+		isBusy();
+		//wait for motion to finish
+		brakeMotors();
+		runWithoutEncoder();
+	}
+
+	private void strafe(double power) {
+		mtrFR.setPower(-power * strafe_Swapper);
+		mtrFL.setPower(power * strafe_Swapper);
+		mtrBL.setPower(-power * strafe_Swapper);
+		mtrBR.setPower(power * strafe_Swapper);
+	}
+	private void strafePosition(double position){
+		positionMm = (int) (position * ticksPerMm);
+		mtrFR.setTargetPosition(-positionMm);
+		mtrFL.setTargetPosition(positionMm);
+		mtrBL.setTargetPosition(-positionMm);
+		mtrBR.setTargetPosition(positionMm);
+	}
+	private void distanceStrafe(double position, double power) {
+		resetEncoders();
+		strafePosition(position);
+		runToPosition();
+		strafe(power);
+		isBusy();
+		brakeMotors();
+		runWithoutEncoder();
+	}
+	private void distanceStrafeWithWait(double position, double power, double time) {
+		Range.clip(power, -1, 1);
+		resetEncoders();
+		strafePosition(position);
+		runToPosition();
+		strafe(power);
+		while (mtrFR.isBusy()) {
+			if(runtime.time()>time){
+				break;
+			}
+		}
+		brakeMotors();
+		runWithoutEncoder();
+	}
+	private void strafePowerExtra(double power) {
+		if(alliance==red){
+			mtrFR.setPower(-power* strafe_Swapper);
+			mtrFL.setPower(power * strafe_Swapper);
+			mtrBL.setPower(-power * strafe_Swapper);
+			mtrBR.setPower(power * strafe_Swapper);
+		}
+		else {
+			mtrFR.setPower(-power * strafe_Swapper);
+			mtrFL.setPower(power * strafe_Swapper);
+			mtrBL.setPower(-power * strafe_Swapper);
+			mtrBR.setPower(power * strafe_Swapper);
+		}
+	}
+
+	private void speedStrafe(double power) {
+		resetEncoders();
+		runUsingEncoders();
+		strafePowerExtra(power);
+		runWithoutEncoder();
+	}
 
 
 }
