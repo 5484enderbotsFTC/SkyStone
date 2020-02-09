@@ -416,8 +416,6 @@ public class SkystoneNew extends LinearOpMode {
             grab.setPosition(fullGrab);
 
         }
-
-
     }
 
 	/**
