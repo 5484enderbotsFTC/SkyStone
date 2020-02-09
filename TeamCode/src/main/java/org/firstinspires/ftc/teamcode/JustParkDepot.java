@@ -39,9 +39,9 @@ public class JustParkDepot extends LinearOpMode {
 
     //servos
 
-    double FLdown = 1;
+    double FLdown = 0.75;
     double FRdown = 0.35;
-    double FLup = 0.8;
+    double FLup = 0.5;
     double FRup = 0.6;
 
     int strafeSwapper = 1;

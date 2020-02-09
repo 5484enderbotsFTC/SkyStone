@@ -86,9 +86,9 @@ public class SkystoneNew extends LinearOpMode {
 	double retractArm = 0.75;
 	double fullGrab = 0.33;
 	double releaseGrab = 0.7;
-	double FLup = 0.8;
+	double FLup = 0.5;
 	double FRup = 0.5;
-	double FLdown = 1;
+	double FLdown = 0.75;
 	double FRdown = 0.27;
 
 	boolean failure = false;
