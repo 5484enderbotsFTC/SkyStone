@@ -274,7 +274,7 @@ public class SkystoneNew extends LinearOpMode {
 
         //drive straight forward
         distanceForward(370, 0.25);
-        speedStrafe(-0.16);
+        //speedStrafe(-0.16);
 
         runtime.reset();
 
@@ -284,30 +284,106 @@ public class SkystoneNew extends LinearOpMode {
             targetVisible = false;
             runtime1 = runtime.time();
             telemetry.addData("Time run:", runtime1);
-            telemetry.update();
-            //failure mode:
-            if ((runtime1 > 10)) {
-                failure = true;
-                telemetry.addData("Fail Safe Mode: ", "Activated");
-                telemetry.update();
-                distanceStrafe(-400 * strafe_Swapper, 0.5);
-                brakeMotors();
-                break;
-            }
+            if(targetVisible = false){
+				telemetry.addData("Target Visible:", false);
+			}
+            if(runtime1 > 2){
+            	telemetry.addData("Runtime is ", "> 2");
+			}
+			telemetry.update();
+			//if it sees the stone, set target visible to true
+			for (VuforiaTrackable trackable : targetsSkyStone) {
+				if (((VuforiaTrackableDefaultListener) trackable.getListener()).isVisible()) {
+					telemetry.addData("Visible Target", trackable.getName());
+					telemetry.update();
+					targetVisible = true;
+					OpenGLMatrix robotLocationTransform = ((VuforiaTrackableDefaultListener) trackable.getListener()).getUpdatedRobotLocation();
+					if (robotLocationTransform != null) {
+						lastLocation = robotLocationTransform;
+					}
+					break;
+				}
+				else{
+					targetVisible = false;
+				}
+			}
+			//failure mode:
+			while((runtime.time() > 2)){
+				telemetry.addData("Fail Safe Mode: ", "Activated");
+				telemetry.update();
+				telemetry.addData("# Stones detected: ", "None");
+				telemetry.update();
+				brakeMotors();
 
-            //if it sees the stone, set target visible to true
-            for (VuforiaTrackable trackable : targetsSkyStone) {
-                if (((VuforiaTrackableDefaultListener) trackable.getListener()).isVisible()) {
-                    telemetry.addData("Visible Target", trackable.getName());
-                    telemetry.update();
-                    targetVisible = true;
-                    OpenGLMatrix robotLocationTransform = ((VuforiaTrackableDefaultListener) trackable.getListener()).getUpdatedRobotLocation();
-                    if (robotLocationTransform != null) {
-                        lastLocation = robotLocationTransform;
-                    }
-                    break;
-                }
-            }
+				if(alliance == red){
+					distanceStrafe(-400,0.5);
+				}
+				else{
+					distanceStrafe(400,0.5);
+				}
+
+				distanceForward(250, 0.3);
+				brakeMotors();
+
+				//grab
+				grab.setPosition(fullGrab);
+				waitFor(0.75);
+
+				//retract
+				arm.setPosition(retractArm);
+				telemetry.addData("Arm:", "Retracted");
+				telemetry.update();
+
+				//backwards
+				distanceForward(-40, -0.5);
+
+				if (alliance == red) {
+					robotToBridge = 410;
+					bridgeToDeposit = 1200;
+				} else {
+					robotToBridge = 660;
+					bridgeToDeposit = 850;
+				}
+				if (alliance == red) {
+					distanceStrafe((-400 + robotToBridge + bridgeToDeposit) * strafe_Swapper, 0.5);
+				} else {
+					distanceStrafe((200 + robotToBridge + bridgeToDeposit) * strafe_Swapper, 0.5);
+				}
+
+				distanceForward(80, 0.3);
+
+				arm.setPosition(groundArm);
+				waitFor(0.75);
+				grab.setPosition(releaseGrab);
+				waitFor(0.75);
+				arm.setPosition(retractArm);
+				waitFor(0.25);
+				grab.setPosition(fullGrab);
+
+				if (ParkingSpot == insideLane) {
+					distanceForward(-40, -0.5);
+					distanceStrafe((-350 * strafe_Swapper), 0.4);
+				} else {
+					distanceForward(-600, 0.4);
+					distanceStrafe((-350 * strafe_Swapper), 0.4);
+				}
+				brakeMotors();
+				failure = true;
+
+        	/*
+            telemetry.addData("Visible Target", "none");
+            telemetry.addData("Skystone", "None");
+            telemetry.update();
+            //fail safe modeee
+			extend.setPosition(retractArm);
+			grab.setPosition(fullGrab);
+			distanceStrafe(-400 * strafe_Swapper, 0.5);
+			distanceStrafe(2000 * strafe_Swapper, 0.5);
+
+        	 */
+        	break;
+
+			}
 
             //if the webcam see the stone:
             if (targetVisible) {
@@ -373,10 +449,10 @@ public class SkystoneNew extends LinearOpMode {
 
                 if (alliance == red) {
                     robotToBridge = 410;
-                    bridgeToDeposit = 1400;
+                    bridgeToDeposit = 1300;
                 } else {
                     robotToBridge = 660;
-                    bridgeToDeposit = 1000;
+                    bridgeToDeposit = 850;
                 }
                 if (alliance == red) {
                     distanceStrafe((-DistanceStrafed + robotToBridge + bridgeToDeposit) * strafe_Swapper, 0.5);
@@ -396,10 +472,10 @@ public class SkystoneNew extends LinearOpMode {
 
                 if (ParkingSpot == insideLane) {
                     distanceForward(-40, -0.5);
-                    distanceStrafe((-950 * strafe_Swapper), 0.4);
+                    distanceStrafe((-350 * strafe_Swapper), 0.4);
                 } else {
                     distanceForward(-600, 0.4);
-                    distanceStrafe((-950 * strafe_Swapper), 0.4);
+                    distanceStrafe((-350 * strafe_Swapper), 0.4);
                 }
                 brakeMotors();
                 //end of program if it worked
@@ -408,14 +484,6 @@ public class SkystoneNew extends LinearOpMode {
 
         }
 
-        if(failure = true){
-            telemetry.addData("Visible Target", "none");
-            telemetry.addData("Skystone", "None");
-            telemetry.update();
-            //fail safe modeee
-            grab.setPosition(fullGrab);
-
-        }
     }
 
 	/**
@@ -514,23 +582,10 @@ public class SkystoneNew extends LinearOpMode {
 		brakeMotors();
 		runWithoutEncoder();
 	}
-	private void distanceStrafeWithWait(double position, double power, double time) {
-		Range.clip(power, -1, 1);
-		resetEncoders();
-		strafePosition(position);
-		runToPosition();
-		strafe(power);
-		while (mtrFR.isBusy()) {
-			if(runtime.time()>time){
-				break;
-			}
-		}
-		brakeMotors();
-		runWithoutEncoder();
-	}
+
 	private void strafePowerExtra(double power) {
 		if(alliance==red){
-			mtrFR.setPower(-power* strafe_Swapper);
+			mtrFR.setPower((-(power-0.04))* strafe_Swapper);
 			mtrFL.setPower(power * strafe_Swapper);
 			mtrBL.setPower(-power * strafe_Swapper);
 			mtrBR.setPower(power * strafe_Swapper);
